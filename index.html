@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Orange Eysines MP - Gestion des stocks mobilier">
+<meta name="theme-color" content="#08080b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Orange Eysines MP — Gestion des Stocks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══ VARIABLES ═══ */
+:root{
+  --o-core:#FF6600;--o-warm:#FF8C00;--o-deep:#E55000;--o-pale:#FFB366;
+  --g-brand:linear-gradient(135deg,#FF6600 0%,#FF8C00 50%,#FFB366 100%);
+  --g-fire:linear-gradient(135deg,#E55000 0%,#FF6600 40%,#FF8C00 100%);
+  --bg:#000000;--s1:#101014;--s2:#17171c;--s3:#1e1e25;--s4:#25252e;
+  --g-card:linear-gradient(145deg,#141418 0%,#0f0f12 100%);
+  --b1:rgba(255,255,255,.08);--b2:rgba(255,255,255,.03);
+  --bo:rgba(255,102,0,.22);
+  --t1:#f5f5f7;--t2:#a0a0b0;--t3:#60607a;--t4:#40404f;
+  --green:#34d399;--green-d:rgba(52,211,153,.1);--green-b:rgba(52,211,153,.2);
+  --red:#f87171;--red-d:rgba(248,113,113,.1);--red-b:rgba(248,113,113,.2);
+  --r:16px;--r2:12px;--r3:8px;--r4:6px;
+  --ease:cubic-bezier(.4,0,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);
+  --header-h:72px;--nav-h:48px;
+}
+
+/* ═══ RESET & BASE ═══ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{height:100%;scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;line-height:1.5}
+
+/* ═══ BACKGROUND ═══ */
+.bg-system{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:#050505;}
+.bg-mesh{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 10% 0%,rgba(255,102,0,.08) 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 90% 100%,rgba(255,140,0,.05) 0%,transparent 60%);animation:meshShift 20s ease infinite alternate}
+@keyframes meshShift{0%{opacity:.6}100%{opacity:1}}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,102,0,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,102,0,.02) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black 20%,transparent 100%)}
+
+/* ═══ SYNC BANNER ═══ */
+#sync-banner{position:fixed;top:var(--header-h);left:0;right:0;z-index:500;background:rgba(255,102,0,.15);border-bottom:1px solid rgba(255,102,0,.3);padding:6px 20px;font-size:11.5px;color:var(--o-pale);display:none;align-items:center;justify-content:center;gap:8px;backdrop-filter:blur(12px)}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--o-core);animation:pulse 1s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ═══ HEADER ═══ */
+header{position:sticky;top:0;z-index:200;height:var(--header-h);background:rgba(0,0,0,.85);border-bottom:1px solid var(--b1);backdrop-filter:blur(20px) saturate(1.5)}
+.header-inner{height:100%;max-width:1800px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.brand-logo-container{display:flex;align-items:center;gap:8px;}
+.brand-logo{width:46px;height:46px;flex-shrink:0;}
+.brand-text-orange{font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:26px;letter-spacing:-0.5px;color:var(--o-core);line-height:1;}
+.brand-sub-text{display:flex;flex-direction:column;justify-content:center;}
+.brand-name{font-family:'Nunito Sans',sans-serif;font-weight:700;font-size:15px;color:#fff;letter-spacing:.3px;line-height:1.2}
+.brand-sub{font-size:11px;color:var(--t3);font-weight:500;letter-spacing:.4px;text-transform:uppercase;}
+.header-sep{width:1px;height:36px;background:linear-gradient(180deg,transparent,var(--b1),transparent);flex-shrink:0;margin:0 8px;}
+
+.h-kpis{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:12px;padding:4px 8px}
+.h-kpi{display:flex;flex-direction:column;align-items:center;padding:4px 14px;min-width:64px}
+.h-kpi-val{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:16px;line-height:1.2}
+.h-kpi-val.orange{color:var(--o-warm)}
+.h-kpi-val.green{color:var(--green)}.h-kpi-val.red{color:var(--red)}.h-kpi-val.white{color:var(--t1)}
+.h-kpi-sep{width:1px;height:24px;background:var(--b1);flex-shrink:0}
+.h-kpi-lbl{font-size:8.5px;color:var(--t3);margin-top:2px;letter-spacing:.5px;text-transform:uppercase;font-weight:700}
+
+.h-right{display:flex;align-items:center;gap:16px}
+.h-clock{text-align:right}
+.h-clock-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:500;color:var(--t2);letter-spacing:1px}
+.h-clock-date{font-size:10px;color:var(--t4);letter-spacing:.3px}
+.h-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:rgba(52,211,153,.07);border:1px solid rgba(52,211,153,.18)}
+.h-pill-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pilldot 2.5s ease infinite}
+@keyframes pilldot{0%,100%{opacity:1}50%{opacity:.3}}
+.h-pill-txt{font-size:10px;color:var(--green);font-weight:700;letter-spacing:1px;text-transform:uppercase}
+
+/* ═══ NAV ═══ */
+nav{position:sticky;top:var(--header-h);z-index:190;background:rgba(5,5,5,.9);border-bottom:1px solid var(--b1);backdrop-filter:blur(24px)}
+.nav-inner{max-width:1800px;margin:0 auto;padding:0 16px;height:var(--nav-h);display:flex;align-items:center;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.nav-inner::-webkit-scrollbar{display:none;}
+.nb{position:relative;height:38px;padding:0 16px;display:flex;align-items:center;gap:8px;border-radius:var(--r3);font-size:12.5px;font-weight:600;color:var(--t3);background:transparent;border:none;cursor:pointer;transition:all .22s var(--ease);white-space:nowrap;flex-shrink:0}
+.nb::before{content:'';position:absolute;inset:0;background:var(--g-brand);opacity:0;transition:opacity .22s;border-radius:var(--r3)}
+.nb:hover{color:var(--t1)}.nb:hover::before{opacity:.07}
+.nb.active{color:var(--o-core);background:rgba(255,102,0,.08)}.nb.active::before{opacity:0}
+.nb:focus-visible{outline:2px solid var(--o-core);outline-offset:2px}
+.nb-icon{width:16px;height:16px;flex-shrink:0;opacity:.7;transition:opacity .22s}
+.nb.active .nb-icon,.nb:hover .nb-icon{opacity:1}
+.nb-line{position:absolute;bottom:0;left:14px;right:14px;height:2px;border-radius:2px 2px 0 0;background:var(--o-core);transform:scaleX(0);transition:transform .3s var(--spring)}
+.nb.active .nb-line{transform:scaleX(1)}
+
+/* ═══ MAIN ═══ */
+main{position:relative;z-index:5;padding:24px;max-width:1800px;margin:0 auto}
+.panel{display:none;animation:fadeIn .35s var(--ease)}
+.panel.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.panel.active>*{animation:slideUp .4s var(--expo) both}
+.panel.active>*:nth-child(1){animation-delay:.02s}.panel.active>*:nth-child(2){animation-delay:.06s}
+.panel.active>*:nth-child(3){animation-delay:.1s}.panel.active>*:nth-child(4){animation-delay:.14s}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mb{margin-bottom:16px}.mb2{margin-bottom:24px}
+
+/* ═══ KPI CARDS ═══ */
+.kpi{position:relative;overflow:hidden;border-radius:var(--r);padding:20px 22px;cursor:default;transition:transform .25s var(--spring),box-shadow .25s var(--ease);border:1px solid var(--b1)}
+.kpi:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.kpi-bg{position:absolute;inset:0;background:var(--g-card);z-index:0}
+.kpi.accent{border-color:var(--bo)}.kpi.accent .kpi-bg{background:linear-gradient(145deg,rgba(255,102,0,.12) 0%,rgba(255,140,0,.04) 40%,#0f0f12 70%)}
+.kpi.accent::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:2;background:var(--g-brand);border-radius:var(--r) var(--r) 0 0}
+.kpi.kpi-green{border-color:var(--green-b)}.kpi.kpi-green .kpi-bg{background:linear-gradient(145deg,rgba(52,211,153,.08) 0%,#0f0f12 60%)}
+.kpi.kpi-green::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:2;background:linear-gradient(90deg,var(--green),transparent)}
+.kpi.kpi-red{border-color:var(--red-b)}.kpi.kpi-red .kpi-bg{background:linear-gradient(145deg,rgba(248,113,113,.08) 0%,#0f0f12 60%)}
+.kpi.kpi-red::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;z-index:2;background:linear-gradient(90deg,var(--red),transparent)}
+.kpi-content{position:relative;z-index:1}
+.kpi-label{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px}
+.kpi-val{font-family:'Nunito Sans',sans-serif;font-weight:900;font-size:42px;line-height:1;letter-spacing:-1px}
+.kpi-val.orange{background:var(--g-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 20px rgba(255,102,0,.3))}
+.kpi-val.green{color:var(--green)}.kpi-val.red{color:var(--red)}.kpi-val.white{color:var(--t1)}
+.kpi-note{font-size:12px;color:var(--t3);margin-top:8px;font-weight:500}
+.kpi-glyph{position:absolute;right:16px;bottom:14px;z-index:1;font-size:46px;opacity:.05;pointer-events:none;transform:rotate(-10deg)}
+
+/* ═══ CARDS ═══ */
+.card{position:relative;overflow:hidden;background:var(--g-card);border:1px solid var(--b1);border-radius:var(--r)}
+.card-head{position:relative;z-index:1;padding:16px 22px;border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(255,255,255,.015)}
+.card-head-gradient{position:absolute;inset:0;background:linear-gradient(90deg,rgba(255,102,0,.05) 0%,transparent 60%);pointer-events:none}
+.card-title{font-size:14px;font-weight:700;color:var(--t1);letter-spacing:.1px;position:relative;z-index:1}
+.card-sub{font-size:11px;color:var(--t3);margin-top:4px;position:relative;z-index:1}
+.card-body{padding:22px;position:relative;z-index:1}
+.card-orange-line::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--g-brand)}
+
+/* ═══ BARS ═══ */
+.bar-list{display:flex;flex-direction:column;gap:12px}
+.bar-item{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:var(--r3);transition:background .18s;cursor:default}
+.bar-item:hover{background:rgba(255,255,255,.03)}
+.bar-name{width:120px;font-size:13px;font-weight:600;color:var(--t2);flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bar-track{flex:1;height:8px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden;min-width:60px}
+.bar-fill{height:100%;border-radius:4px;background:var(--g-brand);transition:width .8s var(--expo)}
+.bar-num{width:36px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--o-warm);flex-shrink:0}
+
+/* ═══ TABLES ═══ */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;min-width:600px}
+thead tr{border-bottom:1px solid var(--b1)}
+th{padding:14px 18px;text-align:left;font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;white-space:nowrap;background:rgba(0,0,0,.2)}
+tbody tr{border-bottom:1px solid var(--b2);transition:background .15s}
+tbody tr:hover{background:rgba(255,102,0,.03)}
+tbody tr:last-child{border-bottom:none}
+td{padding:14px 18px;font-size:13.5px;font-weight:500;white-space:nowrap;color:var(--t1)}
+.th-r,.td-r{text-align:right}.td-dim{color:var(--t3);font-size:12.5px}.td-b{font-weight:700}
+.td-mono{font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--o-warm)}
+.td-name{font-weight:700;color:var(--t1)}
+
+/* ═══ BADGES ═══ */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:var(--r4);font-size:11px;font-weight:700;letter-spacing:.2px;white-space:nowrap}
+.b-in{background:var(--green-d);color:var(--green);border:1px solid var(--green-b)}
+.b-out{background:var(--red-d);color:var(--red);border:1px solid var(--red-b)}
+
+/* ═══ TABLE SPECIALS ═══ */
+.x-sh{position:sticky;left:0;background:var(--s1);z-index:3}
+.x-sr{position:sticky;left:0;background:var(--s1);z-index:2;font-weight:700;color:var(--t1)}
+.x-pos{color:var(--green);font-weight:700;font-family:'JetBrains Mono',monospace}
+.x-neg{color:var(--red);font-weight:700;font-family:'JetBrains Mono',monospace}
+.x-zero{color:var(--t4);font-family:'JetBrains Mono',monospace}
+.x-tot{color:var(--o-warm);font-weight:700;font-family:'JetBrains Mono',monospace}
+.x-tot-row{background:rgba(255,102,0,.05) !important}
+.x-tot-row td{border-top:1px solid var(--bo) !important;color:var(--o-warm) !important;font-weight:700}
+.bilan-tot td{background:rgba(255,102,0,.05) !important;border-top:1px solid var(--bo) !important;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--o-warm)}
+
+/* ═══ FORMS ═══ */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:16px}
+.field{display:flex;flex-direction:column;gap:8px}
+label{font-size:11px;font-weight:700;color:var(--t3);letter-spacing:.5px;text-transform:uppercase}
+input,select,textarea{background:rgba(255,255,255,.03);border:1px solid var(--b1);border-radius:var(--r2);padding:12px 16px;color:var(--t1);font-family:inherit;font-size:14px;font-weight:500;transition:all .22s;outline:none;width:100%}
+input:focus,select:focus{border-color:var(--o-core);background:rgba(255,102,0,.06);box-shadow:0 0 0 4px rgba(255,102,0,.15)}
+input::placeholder{color:var(--t4)}
+select option{background:#151519;color:var(--t1)}
+input[type=date]{color-scheme:dark}
+
+/* ═══ BUTTONS ═══ */
+.mvt-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+.mvt-btn{position:relative;overflow:hidden;padding:16px 20px;border-radius:var(--r2);border:1px solid var(--b1);background:rgba(255,255,255,.03);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:10px;color:var(--t3)}
+.mvt-btn:hover{border-color:var(--t3);color:var(--t2)}
+.mvt-btn.m-in{border-color:var(--green-b);background:rgba(52,211,153,.08);color:var(--green);box-shadow:inset 0 0 20px rgba(52,211,153,.05)}
+.mvt-btn.m-out{border-color:var(--red-b);background:rgba(248,113,113,.08);color:var(--red);box-shadow:inset 0 0 20px rgba(248,113,113,.05)}
+
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border:none;border-radius:var(--r2);font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.btn-orange{background:var(--g-fire);color:#fff;box-shadow:0 4px 20px rgba(255,102,0,.35)}
+.btn-orange:hover{box-shadow:0 6px 28px rgba(255,102,0,.5);transform:translateY(-1px)}
+.btn-orange:active{transform:translateY(0)}
+.btn-ghost{background:rgba(255,255,255,.04);color:var(--t2);border:1px solid var(--b1)}
+.btn-ghost:hover{color:var(--t1);background:rgba(255,255,255,.08)}
+.btn-danger{background:rgba(248,113,113,.08);color:var(--red);border:1px solid var(--red-b)}
+.btn-danger:hover{background:rgba(248,113,113,.15)}
+.btn-sm{padding:8px 16px;font-size:12px}.btn-xs{padding:5px 10px;font-size:11px}
+
+/* ═══ TAGS ═══ */
+.tag-wrap{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 20px}
+.tag{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:var(--r3);background:rgba(255,102,0,.08);border:1px solid rgba(255,102,0,.2);font-size:13px;font-weight:600;color:var(--o-pale);transition:all .2s;cursor:default}
+.tag:hover{background:rgba(255,102,0,.15)}
+.tag-x{cursor:pointer;color:rgba(255,102,0,.5);font-size:12px;line-height:1;transition:color .15s;padding:2px;border-radius:3px}
+.tag-x:hover{color:var(--red)}
+.add-row{display:flex;gap:12px;align-items:flex-end;padding-top:20px;border-top:1px solid var(--b1)}
+.add-row .field{flex:1}
+
+/* ═══ FILTERS ═══ */
+.filter-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+.filter-row input,.filter-row select{min-width:0;flex:1;min-width:140px;font-size:13px;padding:10px 14px}
+.filter-row input[type=text]{min-width:180px}
+.ctrl-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.ctrl-count{font-size:12px;color:var(--t3);font-family:'JetBrains Mono',monospace;letter-spacing:.4px}
+
+/* ═══ TOAST ═══ */
+#toast{position:fixed;bottom:24px;right:24px;z-index:9000;padding:14px 20px;border-radius:var(--r2);font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:12px;opacity:0;transform:translateY(20px) scale(.95);transition:all .4s var(--spring);pointer-events:none;max-width:380px;backdrop-filter:blur(20px);box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#toast.show{opacity:1;transform:translateY(0) scale(1)}
+#toast.ok{background:rgba(10,30,20,.95);border:1px solid var(--green-b);color:var(--green)}
+#toast.err{background:rgba(30,10,10,.95);border:1px solid var(--red-b);color:var(--red)}
+
+.empty{padding:48px 20px;text-align:center;color:var(--t4);font-size:14px;line-height:1.7}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.3;display:block}
+
+/* ═══ RESPONSIVE MOBILE ═══ */
+@media(max-width:950px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .h-kpis{display:none}
+}
+@media(max-width:650px){
+  :root{--header-h:64px;--nav-h:44px}
+  main{padding:16px 12px}
+  .header-inner{padding:0 12px}
+  .brand-logo{width:38px;height:38px;}
+  .brand-text-orange{font-size:22px;}
+  .brand-sub{display:none}
+  .h-pill{display:none}
+  .g4,.g3,.g2{grid-template-columns:1fr;gap:12px}
+  .mvt-wrap{grid-template-columns:1fr}
+  .form-grid{grid-template-columns:1fr}
+  .filter-row{gap:8px}
+  .filter-row input[type=text]{min-width:100%}
+  .ctrl-row{flex-direction:column;align-items:stretch}
+  .ctrl-row > div {display:flex; flex-direction:column;}
+  .kpi-val{font-size:36px}
+  .nb{padding:0 12px;font-size:12px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-system" aria-hidden="true">
+  <div class="bg-mesh"></div>
+  <div class="bg-grid"></div>
+</div>
+
+<div id="sync-banner" role="status" aria-live="polite">
+  <div class="sync-dot"></div>
+  <span id="sync-msg">Synchronisation cloud en cours…</span>
+</div>
+
+<header role="banner">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo-container">
+        <!-- Logo Orange Vecteur Exact -->
+        <svg class="brand-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="100" fill="#FF6600"/>
+          <text x="50" y="82" font-family="Helvetica, Arial, sans-serif" font-weight="bold" font-size="28" fill="#FFFFFF" letter-spacing="-1" text-anchor="middle">orange</text>
+          <text x="89" y="65" font-family="Helvetica, Arial, sans-serif" font-size="10" fill="#FFFFFF">™</text>
+        </svg>
+        <div class="brand-text-orange">Orange</div>
+      </div>
+      <div class="header-sep" aria-hidden="true"></div>
+      <div class="brand-sub-text">
+        <div class="brand-name">Eysines MP</div>
+        <div class="brand-sub">Gestion Stock Mobilier</div>
+      </div>
+    </div>
+    
+    <div class="h-kpis" aria-label="Indicateurs">
+      <div class="h-kpi"><div class="h-kpi-val orange" id="hv-stock">0</div><div class="h-kpi-lbl">Stock</div></div>
+      <div class="h-kpi-sep"></div>
+      <div class="h-kpi"><div class="h-kpi-val green" id="hv-in">0</div><div class="h-kpi-lbl">Entrées</div></div>
+      <div class="h-kpi-sep"></div>
+      <div class="h-kpi"><div class="h-kpi-val red" id="hv-out">0</div><div class="h-kpi-lbl">Sorties</div></div>
+    </div>
+    
+    <div class="h-right">
+      <div class="h-clock" aria-label="Horloge">
+        <div class="h-clock-val" id="clock">--:--</div>
+        <div class="h-clock-date" id="hdate">--/--/----</div>
+      </div>
+      <div class="h-pill" id="status-pill"><div class="h-pill-dot" aria-hidden="true"></div><div class="h-pill-txt" id="status-txt">En ligne</div></div>
+    </div>
+  </div>
+</header>
+
+<nav role="navigation">
+  <div class="nav-inner">
+    <button class="nb active" data-panel="dash">
+      <svg class="nb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Tableau de bord
+    </button>
+    <button class="nb" data-panel="mvt">
+      <svg class="nb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      Mouvement
+    </button>
+    <button class="nb" data-panel="histo">
+      <svg class="nb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      Historique
+    </button>
+    <button class="nb" data-panel="bilan">
+      <svg class="nb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Bilan complet
+    </button>
+    <button class="nb" data-panel="config">
+      <svg class="nb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+      Configuration
+    </button>
+  </div>
+</nav>
+
+<main id="main-content">
+<!-- DASHBOARD -->
+<div class="panel active" id="panel-dash">
+  <div class="g4 mb2" id="dash-kpis"></div>
+  <div class="g2 mb">
+    <div class="card card-orange-line">
+      <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Stock par mobilier</div></div>
+      <div class="card-body"><div class="bar-list" id="bar-type"></div></div>
+    </div>
+    <div class="card card-orange-line">
+      <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Stock par lieu</div></div>
+      <div class="card-body"><div class="bar-list" id="bar-lieu"></div></div>
+    </div>
+  </div>
+  <div class="card card-orange-line mb">
+    <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Récapitulatif Croisé (Type × Lieu)</div></div>
+    <div class="tw"><table><thead><tr id="xh1"></tr></thead><tbody id="xb1"></tbody></table></div>
+  </div>
+  <div class="card card-orange-line">
+    <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Dernières opérations</div>
+      <button class="btn btn-ghost btn-sm" onclick="go('histo')">Voir tout →</button>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>Date</th><th>Mobilier</th><th class="th-r">Qté</th><th>Mouvement</th><th>Lieu</th><th>Agent</th></tr></thead>
+      <tbody id="recent-body"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- MOUVEMENT -->
+<div class="panel" id="panel-mvt">
+  <div style="max-width:800px; margin:0 auto;">
+    <div class="card card-orange-line">
+      <div class="card-head"><div class="card-head-gradient"></div>
+        <div><div class="card-title">Nouveau mouvement</div><div class="card-sub">Sauvegarde locale instantanée & Cloud</div></div>
+      </div>
+      <div class="card-body">
+        <div class="mvt-wrap">
+          <button class="mvt-btn m-in" id="b-in" onclick="setMvt('arrivee')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>+ Arrivée en stock
+          </button>
+          <button class="mvt-btn" id="b-out" onclick="setMvt('depart')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7 7 7-7"/></svg>- Départ du stock
+          </button>
+        </div>
+        <div class="form-grid">
+          <div class="field"><label>Prénom *</label><input id="f-prenom" placeholder="Jean"></div>
+          <div class="field"><label>Nom *</label><input id="f-nom" placeholder="Dupont"></div>
+          <div class="field"><label>Date *</label><input id="f-date" type="date"></div>
+          <div class="field"><label>Mobilier *</label><select id="f-type"></select></div>
+          <div class="field"><label>Quantité *</label><input id="f-qty" type="number" min="1" value="1"></div>
+          <div class="field"><label>Lieu *</label><select id="f-lieu"></select></div>
+        </div>
+        <div class="field mb2"><label>Remarque / État</label><input id="f-note" placeholder="Optionnel..."></div>
+        <button class="btn btn-orange" onclick="addMvt()" style="width:100%; justify-content:center; padding:16px; font-size:15px">
+          Confirmer le mouvement
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORIQUE -->
+<div class="panel" id="panel-histo">
+  <div class="filter-row">
+    <select id="ft" onchange="renderHistory()"><option value="">Tous les types</option></select>
+    <select id="fl" onchange="renderHistory()"><option value="">Tous les lieux</option></select>
+    <select id="fm" onchange="renderHistory()"><option value="">Tous les flux</option><option value="arrivee">↑ Arrivées</option><option value="depart">↓ Départs</option></select>
+    <input type="date" id="fdf" onchange="renderHistory()">
+    <input type="date" id="fdt" onchange="renderHistory()">
+    <input type="text" id="fq" oninput="renderHistory()" placeholder="Rechercher (Nom, Note...)">
+    <button class="btn btn-ghost btn-sm" onclick="resetFilters()">Reset</button>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-count" id="histo-count">0 opération</span>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">↓ Exporter CSV</button>
+      <button class="btn btn-danger btn-sm" onclick="clearAll()">Tout effacer</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="tw"><table>
+      <thead><tr><th>ID</th><th>Date</th><th>Type</th><th>Mobilier</th><th class="th-r">Qté</th><th>Lieu</th><th>Agent</th><th>Remarque</th><th>Actions</th></tr></thead>
+      <tbody id="histo-body"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- BILAN -->
+<div class="panel" id="panel-bilan">
+  <div class="g4 mb2" id="bilan-kpis"></div>
+  <div class="g2 mb">
+    <div class="card card-orange-line">
+      <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Par Mobilier</div></div>
+      <div class="tw"><table><thead><tr><th>Type</th><th class="th-r">Entrées</th><th class="th-r">Sorties</th><th class="th-r">Net</th></tr></thead><tbody id="b-type"></tbody></table></div>
+    </div>
+    <div class="card card-orange-line">
+      <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Par Lieu</div></div>
+      <div class="tw"><table><thead><tr><th>Lieu</th><th class="th-r">Entrées</th><th class="th-r">Sorties</th><th class="th-r">Net</th></tr></thead><tbody id="b-lieu"></tbody></table></div>
+    </div>
+  </div>
+  <div class="card card-orange-line">
+    <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Matrice Globale</div></div>
+    <div class="tw"><table><thead><tr id="xh2"></tr></thead><tbody id="xb2"></tbody></table></div>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div class="panel" id="panel-config">
+  <div class="g2 mb">
+    <div class="card card-orange-line">
+      <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Types de mobilier</div></div>
+      <div class="card-body">
+        <div class="tag-wrap" id="type-tags"></div>
+        <div class="add-row">
+          <div class="field"><input id="new-type" placeholder="Ex: Table de réunion..." onkeydown="if(event.key==='Enter')addType()"></div>
+          <button class="btn btn-orange" onclick="addType()">Ajouter</button>
+        </div>
+      </div>
+    </div>
+    <div class="card card-orange-line">
+      <div class="card-head"><div class="card-head-gradient"></div><div class="card-title">Lieux de stockage</div></div>
+      <div class="card-body">
+        <div class="tag-wrap" id="lieu-tags"></div>
+        <div class="add-row">
+          <div class="field"><input id="new-lieu" placeholder="Ex: Entrepôt B..." onkeydown="if(event.key==='Enter')addLieu()"></div>
+          <button class="btn btn-orange" onclick="addLieu()">Ajouter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+/**
+ * ═══ CONFIGURATION GITHUB / PWA ═══
+ * Utilise JSONBin pour le cloud, mais LocalStorage pour garantir
+ * que l'application marche PARTOUT, même sans réseau temporairement.
+ */
+const CONFIG = {
+  BIN_KEY: '$2a$10$4c3S00iAYDjrDWXwcIQnG.eE.f77WE2UQLDxJ9DQZE5spHJdsJkim',
+  BIN_ID: '69a04c28ae596e708f4c35e7',
+  LS_KEY: 'OrangeStockData_v1'
+};
+
+let state = {
+  types: ['Fauteuils', 'Écrans', 'Bureau', 'Caissons', 'Armoire haute', 'Armoire basse'],
+  lieux: ['Archives 1', 'Archives 2', 'Hexagone LTI', 'Hexagone stock', 'Salle de musique', 'Magasin', 'Atelier', 'Quai de livraison'],
+  mvts: [],
+  ctr: 0,
+  currentMvt: 'arrivee'
+};
+
+const $ = sel => document.querySelector(sel);
+const $$ = sel => document.querySelectorAll(sel);
+const getEl = id => document.getElementById(id);
+const gv = id => getEl(id)?.value.trim() || '';
+const he = s => s?.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;') || '';
+const fd = d => { if(!d)return'—'; const[y,m,dd]=d.split('-'); return`${dd}/${m}/${y}`; };
+
+let toastTimer;
+function toast(msg, type='info') {
+  const t = getEl('toast');
+  t.innerHTML = `<span>${type==='ok'?'✓':'!'}</span>${he(msg)}`;
+  t.className = `show ${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = '', 3500);
+}
+
+function updateClock() {
+  const n = new Date();
+  getEl('clock').textContent = n.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
+  getEl('hdate').textContent = n.toLocaleDateString('fr-FR');
+}
+setInterval(updateClock, 1000); updateClock();
+
+/* ═══ HYBRID STORAGE (LOCAL + CLOUD) ═══ */
+
+// 1. Charger depuis le LocalStorage (Instantané)
+function loadLocal() {
+  try {
+    const local = localStorage.getItem(CONFIG.LS_KEY);
+    if(local) {
+      state = { ...state, ...JSON.parse(local) };
+      renderAll();
+    }
+  } catch(e) { console.error("Erreur lecture locale"); }
+}
+
+// 2. Sauvegarder dans LocalStorage
+function saveLocal() {
+  localStorage.setItem(CONFIG.LS_KEY, JSON.stringify({
+    types: state.types, lieux: state.lieux, mvts: state.mvts, ctr: state.ctr
+  }));
+}
+
+// 3. Charger depuis JSONBin (Cloud)
+async function syncCloud() {
+  getEl('sync-banner').style.display = 'flex';
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': CONFIG.BIN_KEY }
+    });
+    if(res.ok) {
+      const json = await res.json();
+      const cloudState = json.record;
+      // Résolution de conflit très basique : on prend celui avec le plus d'opérations
+      if(cloudState && cloudState.ctr > state.ctr) {
+        state.types = cloudState.types;
+        state.lieux = cloudState.lieux;
+        state.mvts = cloudState.mvts || [];
+        state.ctr = cloudState.ctr;
+        saveLocal();
+        renderAll();
+        toast('Mise à jour cloud reçue', 'ok');
+      } else if (cloudState && state.ctr > cloudState.ctr) {
+        // Le local est plus récent (ex: on a travaillé hors-ligne), on pousse vers le cloud
+        pushCloud();
+      }
+      setStatus(true);
+    }
+  } catch(e) {
+    setStatus(false); // Mode hors-ligne
+  }
+  getEl('sync-banner').style.display = 'none';
+}
+
+// 4. Pousser vers JSONBin (Cloud)
+async function pushCloud() {
+  try {
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': CONFIG.BIN_KEY },
+      body: JSON.stringify({ types: state.types, lieux: state.lieux, mvts: state.mvts, ctr: state.ctr })
+    });
+    setStatus(res.ok);
+  } catch(e) {
+    setStatus(false);
+  }
+}
+
+function setStatus(isOnline) {
+  const d = getEl('status-pill').querySelector('.h-pill-dot');
+  const t = getEl('status-txt');
+  if(isOnline) {
+    d.style.background = 'var(--green)'; d.style.boxShadow = '0 0 8px var(--green)';
+    t.textContent = 'En ligne'; t.style.color = 'var(--green)';
+    getEl('status-pill').style.borderColor = 'rgba(52,211,153,.18)';
+  } else {
+    d.style.background = 'var(--red)'; d.style.boxShadow = '0 0 8px var(--red)';
+    t.textContent = 'Hors ligne'; t.style.color = 'var(--red)';
+    getEl('status-pill').style.borderColor = 'rgba(248,113,113,.18)';
+  }
+}
+
+// Sync automatique toutes les 20s
+setInterval(syncCloud, 20000);
+
+/* ═══ NAVIGATION ═══ */
+function go(id) {
+  $$('.panel').forEach(p => p.classList.remove('active'));
+  $$('.nb').forEach(b => b.classList.remove('active'));
+  getEl(`panel-${id}`).classList.add('active');
+  $(`.nb[data-panel="${id}"]`).classList.add('active');
+  renderAll();
+}
+
+$$('.nav-inner')[0].addEventListener('click', e => {
+  const btn = e.target.closest('.nb');
+  if(btn) go(btn.dataset.panel);
+});
+
+/* ═══ ACTIONS CORE ═══ */
+async function triggerSave() {
+  saveLocal(); // Sauvegarde locale instantanée (sécurité max)
+  renderAll(); // Rendu UI
+  await pushCloud(); // Envoi asynchrone au cloud
+}
+
+function setMvt(type) {
+  state.currentMvt = type;
+  getEl('b-in').className = 'mvt-btn ' + (type === 'arrivee' ? 'm-in' : '');
+  getEl('b-out').className = 'mvt-btn ' + (type === 'depart' ? 'm-out' : '');
+}
+
+async function addMvt() {
+  const prenom=gv('f-prenom'), nom=gv('f-nom'), date=gv('f-date');
+  const type=gv('f-type'), qty=parseInt(gv('f-qty'))||0, lieu=gv('f-lieu'), note=gv('f-note');
+  
+  if(!prenom||!nom||!date||!type||!qty||!lieu) { toast('Champs requis manquants', 'err'); return; }
+  
+  if(state.currentMvt === 'depart') {
+    const stock = netT(type);
+    if(qty > stock) { toast(`Stock insuffisant (${stock} dispo)`, 'err'); return; }
+  }
+  
+  state.ctr++;
+  state.mvts.unshift({ id:state.ctr, date, type, qty, lieu, prenom, nom, note, mvt:state.currentMvt, ts:Date.now() });
+  
+  await triggerSave();
+  toast(`${state.currentMvt==='arrivee'?'Arrivée':'Départ'} de ${qty}x ${type} OK`, 'ok');
+  
+  ['f-prenom','f-nom','f-note'].forEach(id=>getEl(id).value=''); getEl('f-qty').value='1';
+  getEl('f-prenom').focus();
+}
+
+/* ═══ CALCULS ═══ */
+const netT=t=>state.mvts.reduce((a,m)=>m.type!==t?a:a+(m.mvt==='arrivee'?m.qty:-m.qty),0);
+const netL=l=>state.mvts.reduce((a,m)=>m.lieu!==l?a:a+(m.mvt==='arrivee'?m.qty:-m.qty),0);
+const inT=(t,l)=>state.mvts.filter(m=>m.type===t&&(!l||m.lieu===l)&&m.mvt==='arrivee').reduce((a,m)=>a+m.qty,0);
+const outT=(t,l)=>state.mvts.filter(m=>m.type===t&&(!l||m.lieu===l)&&m.mvt==='depart').reduce((a,m)=>a+m.qty,0);
+const inL=l=>state.mvts.filter(m=>m.lieu===l&&m.mvt==='arrivee').reduce((a,m)=>a+m.qty,0);
+const outL=l=>state.mvts.filter(m=>m.lieu===l&&m.mvt==='depart').reduce((a,m)=>a+m.qty,0);
+
+/* ═══ RENDERERS ═══ */
+function fillSelects() {
+  const fill = (id, arr, ph) => {
+    const el = getEl(id); if(!el) return;
+    const v = el.value;
+    el.innerHTML = ph ? `<option value="">${ph}</option>` : '';
+    arr.forEach(x => { const o=document.createElement('option'); o.value=he(x); o.textContent=x; el.appendChild(o); });
+    if([...el.options].some(o=>o.value===v)) el.value=v;
+  };
+  fill('f-type', state.types, ''); fill('f-lieu', state.lieux, '');
+  fill('ft', state.types, 'Tous types'); fill('fl', state.lieux, 'Tous lieux');
+}
+
+function rHeader() {
+  const ti = state.mvts.filter(m=>m.mvt==='arrivee').reduce((a,m)=>a+m.qty,0);
+  const to = state.mvts.filter(m=>m.mvt==='depart').reduce((a,m)=>a+m.qty,0);
+  getEl('hv-stock').textContent = ti - to;
+  getEl('hv-in').textContent = ti;
+  getEl('hv-out').textContent = to;
+}
+
+function rDash() {
+  const ti = state.mvts.filter(m=>m.mvt==='arrivee').reduce((a,m)=>a+m.qty,0);
+  const to = state.mvts.filter(m=>m.mvt==='depart').reduce((a,m)=>a+m.qty,0);
+  
+  getEl('dash-kpis').innerHTML = `
+    <div class="kpi accent"><div class="kpi-bg"></div><div class="kpi-content"><div class="kpi-label">Stock Total Net</div><div class="kpi-val orange">${ti-to}</div></div><div class="kpi-glyph">📦</div></div>
+    <div class="kpi kpi-green"><div class="kpi-bg"></div><div class="kpi-content"><div class="kpi-label">Volume Entrant</div><div class="kpi-val green">${ti}</div></div><div class="kpi-glyph">↑</div></div>
+    <div class="kpi kpi-red"><div class="kpi-bg"></div><div class="kpi-content"><div class="kpi-label">Volume Sortant</div><div class="kpi-val red">${to}</div></div><div class="kpi-glyph">↓</div></div>
+    <div class="kpi"><div class="kpi-bg"></div><div class="kpi-content"><div class="kpi-label">Total Opérations</div><div class="kpi-val white">${state.mvts.length}</div></div><div class="kpi-glyph">⇄</div></div>`;
+
+  const mxT = Math.max(1, ...state.types.map(t=>Math.abs(netT(t))));
+  getEl('bar-type').innerHTML = state.types.map(t => `<div class="bar-item"><div class="bar-name">${he(t)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,Math.round(netT(t)/mxT*100))}%"></div></div><div class="bar-num">${netT(t)}</div></div>`).join('')||'<div class="empty">Aucune donnée</div>';
+
+  const mxL = Math.max(1, ...state.lieux.map(l=>Math.abs(netL(l))));
+  getEl('bar-lieu').innerHTML = state.lieux.map(l => `<div class="bar-item"><div class="bar-name">${he(l)}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.max(0,Math.round(netL(l)/mxL*100))}%"></div></div><div class="bar-num">${netL(l)}</div></div>`).join('')||'<div class="empty">Aucune donnée</div>';
+
+  rCross('xh1','xb1');
+
+  getEl('recent-body').innerHTML = state.mvts.slice(0,6).map(m => `<tr><td class="td-dim">${fd(m.date)}</td><td class="td-name">${he(m.type)}</td><td class="td-mono td-r">${m.qty}</td><td><span class="badge ${m.mvt==='arrivee'?'b-in':'b-out'}">${m.mvt==='arrivee'?'↑ IN':'↓ OUT'}</span></td><td class="td-dim">${he(m.lieu)}</td><td class="td-dim">${he(m.prenom)} ${he(m.nom)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">Vide</td></tr>';
+}
+
+function rCross(hId, bId) {
+  const H=getEl(hId), B=getEl(bId); if(!H||!B)return;
+  H.innerHTML=`<th class="x-sh">Matériel</th>`+state.lieux.map(l=>`<th class="th-r">${he(l)}</th>`).join('')+`<th class="th-r" style="color:var(--o-warm)">Total</th>`;
+  const cols=state.lieux.map(()=>0); let grand=0;
+  B.innerHTML=state.types.map(t=>{
+    let rt=0;
+    const cells=state.lieux.map((l,i)=>{
+      const n=inT(t,l)-outT(t,l); cols[i]+=n; rt+=n;
+      return `<td class="td-r ${n>0?'x-pos':n<0?'x-neg':'x-zero'}">${n===0?'—':n>0?'+'+n:n}</td>`;
+    });
+    grand+=rt; return `<tr><td class="x-sr">${he(t)}</td>${cells.join('')}<td class="td-r x-tot">${rt}</td></tr>`;
+  }).join('');
+  B.innerHTML+=`<tr class="x-tot-row"><td class="x-sr">Général</td>${cols.map(n=>`<td class="td-r ${n>0?'x-pos':n<0?'x-neg':'x-zero'}">${n}</td>`).join('')}<td class="td-r x-tot">${grand}</td></tr>`;
+}
+
+function renderHistory() {
+  let L = [...state.mvts];
+  const t=gv('ft'), l=gv('fl'), m=gv('fm'), df=gv('fdf'), dt=gv('fdt'), q=gv('fq').toLowerCase();
+  
+  if(t) L=L.filter(x=>x.type===t); if(l) L=L.filter(x=>x.lieu===l); if(m) L=L.filter(x=>x.mvt===m);
+  if(df) L=L.filter(x=>x.date>=df); if(dt) L=L.filter(x=>x.date<=dt);
+  if(q) L=L.filter(x=>(x.nom+' '+x.prenom+' '+x.type+' '+x.lieu+' '+(x.note||'')).toLowerCase().includes(q));
+  
+  getEl('histo-count').textContent = `${L.length} op.`;
+  getEl('histo-body').innerHTML = L.map(x => `<tr><td class="td-dim td-mono">#${x.id}</td><td>${fd(x.date)}</td><td><span class="badge ${x.mvt==='arrivee'?'b-in':'b-out'}">${x.mvt==='arrivee'?'↑ IN':'↓ OUT'}</span></td><td class="td-name">${he(x.type)}</td><td class="td-r td-mono">${x.qty}</td><td class="td-dim">${he(x.lieu)}</td><td class="td-dim">${he(x.prenom)} ${he(x.nom)}</td><td class="td-dim">${he(x.note||'—')}</td><td><button class="btn btn-danger btn-xs" onclick="delMvt(${x.id})">Suppr</button></td></tr>`).join('')||'<tr><td colspan="9" class="empty">Aucun résultat</td></tr>';
+}
+
+function resetFilters() { ['ft','fl','fm','fdf','fdt','fq'].forEach(id=>getEl(id).value=''); renderHistory(); }
+
+async function delMvt(id) {
+  if(!confirm('Effacer cette ligne ?')) return;
+  state.mvts = state.mvts.filter(m => m.id !== id);
+  await triggerSave(); toast('Ligne effacée', 'ok');
+}
+async function clearAll() {
+  if(!confirm('DANGER : Effacer tout le stock ?')) return;
+  state.mvts = []; await triggerSave(); toast('Base remise à zéro', 'ok');
+}
+
+function rBilan() {
+  getEl('b-type').innerHTML = state.types.map(t=>{ const i=inT(t), o=outT(t), n=i-o; return `<tr><td class="td-name">${he(t)}</td><td class="td-r n-in">+${i}</td><td class="td-r n-out">-${o}</td><td class="td-r ${n>0?'n-in':n<0?'n-out':'n-zero'}">${n}</td></tr>`; }).join('');
+  getEl('b-lieu').innerHTML = state.lieux.map(l=>{ const i=inL(l), o=outL(l), n=i-o; return `<tr><td class="td-name">${he(l)}</td><td class="td-r n-in">+${i}</td><td class="td-r n-out">-${o}</td><td class="td-r ${n>0?'n-in':n<0?'n-out':'n-zero'}">${n}</td></tr>`; }).join('');
+  rCross('xh2','xb2');
+}
+
+function rConfig() {
+  getEl('type-tags').innerHTML = state.types.map(t=>`<div class="tag">${he(t)}<span class="tag-x" onclick="delType('${he(t)}')">✕</span></div>`).join('');
+  getEl('lieu-tags').innerHTML = state.lieux.map(l=>`<div class="tag">${he(l)}<span class="tag-x" onclick="delLieu('${he(l)}')">✕</span></div>`).join('');
+}
+
+async function addType() { const v=gv('new-type'); if(!v||state.types.includes(v))return; state.types.push(v); getEl('new-type').value=''; await triggerSave(); }
+async function addLieu() { const v=gv('new-lieu'); if(!v||state.lieux.includes(v))return; state.lieux.push(v); getEl('new-lieu').value=''; await triggerSave(); }
+async function delType(t) { if(state.mvts.some(m=>m.type===t)&&!confirm(`Ce type est utilisé ! Supprimer ?`))return; state.types=state.types.filter(x=>x!==t); await triggerSave(); }
+async function delLieu(l) { if(state.mvts.some(m=>m.lieu===l)&&!confirm(`Ce lieu est utilisé ! Supprimer ?`))return; state.lieux=state.lieux.filter(x=>x!==l); await triggerSave(); }
+
+function exportCSV() {
+  const rows = [['ID','Date','Mvt','Type','Qté','Lieu','Prénom','Nom','Note']];
+  state.mvts.forEach(m => rows.push([m.id, m.date, m.mvt, m.type, m.qty, m.lieu, m.prenom, m.nom, m.note||'']));
+  const csv = rows.map(r => r.map(x => `"${x}"`).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'}));
+  a.download = `Stock_Orange_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function renderAll() { fillSelects(); rHeader(); rDash(); renderHistory(); rBilan(); rConfig(); }
+
+/* ═══ INITIALISATION ═══ */
+document.addEventListener('DOMContentLoaded', () => {
+  getEl('f-date').value = new Date().toISOString().slice(0,10);
+  loadLocal(); // Rend l'UI immédiatement disponible
+  syncCloud(); // Met à jour en fond
+});
+
+</script>
+</body>
+</html>
